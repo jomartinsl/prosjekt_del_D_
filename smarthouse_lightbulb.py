@@ -13,6 +13,7 @@ class Actuator:
         self.did = did
         self.state = ActuatorState('False')
 
+
     def simulator(self):
 
         logging.info(f"Actuator {self.did} starting")
@@ -23,27 +24,29 @@ class Actuator:
 
             time.sleep(common.LIGHTBULB_SIMULATOR_SLEEP_TIME)
 
+
     def client(self):
 
         logging.info(f"Actuator Client {self.did} starting")
 
-        # TODO: START
-        # send request to cloud service with regular intervals and
-        # set state of actuator according to the received response
+        while True:
+                
+            logging.info(f"Actuator Client {self.did}: {self.state.state}")
 
-        logging.info(f"Client {self.did} finishing")
+            url = f'{common.BASE_URL}actuator/{self.did}/current'
 
-        # TODO: END
+            response = requests.get(url)
+            data = response.json()
+            
+            self.state = ActuatorState(data)
+
+            time.sleep(common.LIGHTBULB_CLIENT_SLEEP_TIME)
+
+
+
 
     def run(self):
-
-        pass
-        # TODO: START
-
-        # start thread simulating physical light bulb
-
-        # start thread receiving state from the cloud
-
-        # TODO: END
-
+        sim_actuator_thread = threading.Thread(target=self.simulator)
+        actuator_thread = threading.Thread(target=self.client)
+        return sim_actuator_thread, actuator_thread
 

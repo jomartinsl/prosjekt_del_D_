@@ -2,23 +2,32 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 import requests
+from smarthouse import domain
 
 from messaging import ActuatorState
 import common
 
 
 def lightbulb_cmd(state, did):
-
     new_state = state.get()
-
     logging.info(f"Dashboard: {new_state}")
+    Geturl = f"http://127.0.0.1:8000/smarthouse/actuator/{did}/current"
+    Puturl = f"http://127.0.0.1:8000/smarthouse/actuator/{did}"
+    response = requests.get(Geturl)
 
-    # TODO: START
-    # send HTTP request with new actuator state to cloud service
+    domain.SmartHouse.get_device_by_id(did).state = new_state
 
+    if new_state == 'On':
+        new_data = {"state": "running"}
+        domain.SmartHouse.get_device_by_id(did).state = True
+        Cmd_To_Actuator = requests.put(Puturl)
 
-    # TODO: END
-
+    if new_state == "Off":
+        new_data = {"state": "off"} # oppdaterer ny tilstand til OFF
+        domain.SmartHouse.get_device_by_id(did).state = False
+        Cmd_To_Actuator = requests.put(Puturl)
+    
+    logging.info(f"Dashboard: {new_state}")
 
 def init_lightbulb(container, did):
 

@@ -122,10 +122,12 @@ limit 1;
                 s = str(actuator.state)
             elif actuator.state is True:
                 s = '1.0'
+            elif actuator.state==False:
+                s = '0.0'
             query = f"""
-UPDATE actuator_state 
+UPDATE states 
 SET state = {s}
-WHERE device_id = '{actuator.id}';
+WHERE device = '{actuator.id}';
         """
             c = self.cursor()
             c.execute(query)
@@ -201,6 +203,15 @@ HAVING COUNT(m.value) > 3;
                 result.append(int(h[0]))
         return result
     
+
+    def insert_measurement(self, sensor: str, measurement: Measurement) -> None:
+        query = f"""
+INSERT INTO measurements (device, ts, value, unit) VALUES (?, ?, ?, ?)
+        """
+        c = self.cursor()
+        c.execute(query, (sensor, measurement.timestamp, measurement.value, measurement.unit))
+        self.conn.commit()
+        c.close()
 
 if __name__ == "__main__":
     repo = SmartHouseRepository("data\db.sql")

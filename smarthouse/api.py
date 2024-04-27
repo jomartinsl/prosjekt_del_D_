@@ -123,12 +123,12 @@ def get_sensor(uuid: str):
     return {"error": "device not found"}
 
 
-@app.post("/smarthouse/sensor/{uuid}/current")
-def post_sensor(uuid: str):
+@app.post("/smarthouse/sensor/{uuid}/current/{measurement}")
+def post_sensor(uuid: str, measurement: float):
     for i in range(len(smarthouse.get_devices())):
         if smarthouse.get_devices()[i].id == uuid:
             c = repo.conn.cursor()
-            c.execute(f"INSERT INTO measurements (device, ts, value, unit) VALUES ('{uuid}', '{datetime.now().isoformat()}', {random() * 10}, '{smarthouse.get_devices()[i].unit}');")
+            c.execute(f"INSERT INTO measurements (device, ts, value, unit) VALUES ('{uuid}', '{datetime.now().isoformat()}', {measurement}, '{smarthouse.get_devices()[i].unit}');")
             repo.conn.commit()
             c.close()
 
@@ -175,7 +175,7 @@ def put_device(uuid: str):
     for i in range(len(smarthouse.get_devices())):
         if smarthouse.get_devices()[i].id == uuid:
             repo.update_actuator_state(smarthouse.get_devices()[i])
-            return {"device": i+1, "room": smarthouse.get_devices()[i].room.room_name, "state": smarthouse.get_devices()[i].state}
+            return {smarthouse.get_devices()[i].state}
 
     return {"error": "device not found"}
 
